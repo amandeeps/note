@@ -64,6 +64,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutNoteDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutNoteDialog.Designer.cs">
+      <DependentUpon>AboutNoteDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PromptSaveDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PromptSaveDialog.Designer.cs">
+      <DependentUpon>PromptSaveDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -72,6 +84,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AboutNoteDialog.resx">
+      <DependentUpon>AboutNoteDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PromptSaveDialog.resx">
+      <DependentUpon>PromptSaveDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>

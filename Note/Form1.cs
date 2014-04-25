@@ -16,27 +16,18 @@ namespace Note
         public Form1()
         {
             InitializeComponent();
-            updateTitle("Untitled");
+            updateTitle();
             mainTextBox.TextChanged += mainTextBox_TextChanged;
         }
 
         private bool dirty = false;
         private string openFilePath = string.Empty;
+        private string fileName = "Untitled";
 
         private OpenFileDialog openFileDialog = null;
         private SaveFileDialog saveFileDialog = null;
 
         void mainTextBox_TextChanged(object sender, EventArgs e)
-        {
-            setDirty();
-        }
-
-        private void updateTitle(string file)
-        {
-            this.Text = file + " - Note";
-        }
-
-        private void setDirty()
         {
             if (!dirty)
             {
@@ -45,10 +36,27 @@ namespace Note
             }
         }
 
+        private void updateTitle()
+        {
+            this.Text = fileName + " - Note";
+        }
+
         private bool promptSaveContinue()
         {
-            //TODO Show Dialog
-            saveToFile();
+            if (dirty)
+            {
+                PromptSaveDialog.Instance.FileName = fileName;
+                switch (PromptSaveDialog.Instance.ShowDialog())
+                {
+                    case DialogResult.OK:
+                        saveToFile();
+                        break;
+                    case DialogResult.No:
+                        break;
+                    case DialogResult.Cancel:
+                        return false;
+                }
+            }
             return true;
         }
 
@@ -60,27 +68,29 @@ namespace Note
                 mainTextBox.Text = "";
 
                 dirty = false;
-                updateTitle("Untitled");
+                fileName = "Untitled";
+                updateTitle();
             }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (openFileDialog == null)
+            if (promptSaveContinue())
             {
-                openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
-            }
-            if(openFileDialog.ShowDialog() == DialogResult.OK)
-            {
-                if (promptSaveContinue())
+                if (openFileDialog == null)
+                {
+                    openFileDialog = new OpenFileDialog();
+                    openFileDialog.Filter = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*";
+                }
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     openFilePath = openFileDialog.FileName;
                     using (StreamReader reader = new StreamReader(openFilePath))
                         mainTextBox.Text = reader.ReadToEnd();
 
-                    string safeName = openFileDialog.SafeFileName;
-                    updateTitle(safeName.Remove(safeName.IndexOf('.')));
+                    fileName = System.Text.RegularExpressions.Regex.Match(
+                        openFilePath, @"([^\\]*)(?=\.)").Value;
+                    updateTitle();
                     dirty = false;
                 }
             }
@@ -120,10 +130,9 @@ namespace Note
             {
                 openFilePath = saveFileDialog.FileName;
                 saveHelper();
-                string safeName = openFilePath;
-                safeName = System.Text.RegularExpressions.Regex.Match(
-                    safeName, @"([^\\]*)(?=\.)").Value;
-                updateTitle(safeName);
+                fileName = System.Text.RegularExpressions.Regex.Match(
+                    openFilePath, @"([^\\]*)(?=\.)").Value;
+                updateTitle();
             }
         }
 
@@ -167,7 +176,22 @@ namespace Note
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //TODO Show About Dialog
+            AboutNoteDialog.Instance.Show();
+        }
+
+        private void fontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FontDialog fd = new FontDialog();
+            if(fd.ShowDialog()== DialogResult.OK)
+            {
+                mainTextBox.Font = fd.Font;
+            }
+        }
+
+        private void Form1_Closing(object sender, FormClosingEventArgs e)
+        {
+            if (!promptSaveContinue())
+                e.Cancel = true;
         }
 
     }
